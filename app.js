@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 5001
 app.use(express.static('dist'))
 
 app.get('/version', (req, res) => {
-  res.send('1')
+  res.send('Deployment is now triggered in the workflow')
 })
 
 app.listen(PORT, () => {
