@@ -10,6 +10,10 @@ app.get('/version', (req, res) => {
   res.send('Deployment is now triggered in the workflow')
 })
 
+app.get('health', (req, res) => {
+  res.send('ok')
+})
+
 app.listen(PORT, () => {
   console.log(`server started on port ${PORT}`)
 })
