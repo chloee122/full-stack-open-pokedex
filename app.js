@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 5001
 app.use(express.static('dist'))
 
 app.get('/version', (req, res) => {
-  res.send('Deployment is now triggered in the workflow')
+  res.send('Deployment is now triggered only when merging PR')
 })
 
 app.get('/health', (req, res) => {
