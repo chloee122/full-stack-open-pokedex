@@ -1,7 +1,7 @@
 name: Development pipeline
 
 env:
-  CONDITION: ${{!contains(toJSON(github.event.commits.*.name), '#skip') && github.event_name == 'push'}}
+  CONDITION: ${{!contains(toJson(github.event.commits.*.message), '#skip') && github.event_name == 'push'}}
 
 on:
   push:
