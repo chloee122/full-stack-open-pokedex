@@ -1,5 +1,8 @@
 name: Development pipeline
 
+env:
+  CONDITION: ${{!contains(toJson(github.event.commits.*.message), '#skip') && github.event_name == 'push'}}
+
 on:
   push:
     branches:
@@ -44,20 +47,19 @@ jobs:
       - run: npm run build
       - run: npm test
       - name: Trigger deployment
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ env.CONDITION == 'true'}}
         run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
 
   tag_release:
-      needs: [simple_deployment_pipeline]
-      runs-on: ubuntu-20.04
-      steps:
-        - uses: actions/checkout@v4
-        - uses: actions/setup-node@v4
-          with:
-            node-version: "20"
-        - name: Bump version and push tag
-          if: ${{ github.event_name == 'push' }}
-          uses: anothrNick/github-tag-action@1.70.0
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
-
+    needs: [simple_deployment_pipeline]
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Bump version and push tag
+        if: ${{ env.CONDITION == 'true'}}
+        uses: anothrNick/github-tag-action@1.70.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
