@@ -44,11 +44,33 @@ jobs:
         run: npm install
       - name: Check style
         run: npm run eslint
-      - run: npm run build
+      - name: Run build
+        id: build
+        run: |
+          npm run build
+      - name: Build failed
+        uses: sarisia/actions-status-discord@v1
+        if: ${{failure() && steps.build.conclusion == 'failure'}}
+        with:
+          nodetail: true
+          content: Build failed!
+          description: commit https://github.com/chloee122/full-stack-open-pokedex/commit/${{github.sha}} by ${{github.actor}} broke the build :(
+          webhook: ${{secrets.DISCORD_WEBHOOK}}
       - run: npm test
+
       - name: Trigger deployment
         if: ${{ env.CONDITION == 'true'}}
         run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
+        
+      - name: Successful Deployment
+        uses: sarisia/actions-status-discord@v1
+        if: ${{ success()}}
+        with:
+          nodetail: true
+          content: A new version of Pokedex deployed
+          description: to https://full-stack-open-pokedex-hshi.onrender.com by ${{github.actor}}
+          webhook: ${{secrets.DISCORD_WEBHOOK}}
+
 
   tag_release:
     needs: [simple_deployment_pipeline]
@@ -60,6 +82,6 @@ jobs:
           node-version: "20"
       - name: Bump version and push tag
         if: ${{ env.CONDITION == 'true'}}
-        uses: anothrNick/github-tag-action@1.70.0
+        uses: anothrNick/github-tag-action@777684df761b882a3f4f70db16ac70d8cc78d0ea
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
