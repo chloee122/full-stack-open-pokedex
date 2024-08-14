@@ -60,14 +60,17 @@ jobs:
       - name: Trigger deployment
         if: ${{ env.CONDITION == 'true'}}
         run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
-      - name: Successful Deployment
-        if: ${{ success()}}
-        uses: rjstone/discord-webhook-notify@v1
-        with:
-          severity: info
-          text: A new version of Pokedex deployed
-          details: to https://full-stack-open-pokedex-hshi.onrender.com by ${{github.actor}}
-          webhookUrl: ${{secrets.DISCORD_WEBHOOK}}
+      - name: Log Webhook Response
+        run: |
+          curl -X POST -H "Content-Type: application/json" -d '{"content": "Test message"}' ${{secrets.DISCORD_WEBHOOK}} -v  
+      # - name: Successful Deployment
+      #   if: ${{ success()}}
+      #   uses: rjstone/discord-webhook-notify@v1
+      #   with:
+      #     severity: info
+      #     text: A new version of Pokedex deployed
+      #     details: to https://full-stack-open-pokedex-hshi.onrender.com by ${{github.actor}}
+      #     webhookUrl: ${{secrets.DISCORD_WEBHOOK}}
 
 
   tag_release:
