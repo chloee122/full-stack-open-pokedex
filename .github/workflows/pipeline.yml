@@ -44,11 +44,31 @@ jobs:
         run: npm install
       - name: Check style
         run: npm run eslint
-      - run: npm run build
+      - name: Run build
+        id: build
+        run: |
+          npm run build
+          exit 1
+      - name: Build failed
+        if: ${{failure() && steps.build.conclusion == 'failure'}}
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: error
+          text: Build failed!
+          details: commit https://github.com/chloee122/full-stack-open-pokedex/commit/${{github.sha}} by ${{github.actor}} broke the build :(
+          webhookUrl: ${{secrets.DISCORD_WEBHOOK}}
       - run: npm test
       - name: Trigger deployment
         if: ${{ env.CONDITION == 'true'}}
         run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
+      - name: Successful Deployment
+        if: ${{ success()}}
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: info
+          text: A new version of Pokedex deployed
+          details: to https://full-stack-open-pokedex-hshi.onrender.com by ${{github.actor}}
+          webhookUrl: ${{secrets.DISCORD_WEBHOOK}}
 
   tag_release:
     needs: [simple_deployment_pipeline]
@@ -60,6 +80,6 @@ jobs:
           node-version: "20"
       - name: Bump version and push tag
         if: ${{ env.CONDITION == 'true'}}
-        uses: anothrNick/github-tag-action@1.70.0
+        uses: anothrNick/github-tag-action@777684df761b882a3f4f70db16ac70d8cc78d0ea
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
